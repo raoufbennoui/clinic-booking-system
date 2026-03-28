@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Book with {{ doctor[1] }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Book Appointment</h1>
+    <p>
+      <span class="badge" style="background:var(--info-bg);color:var(--info-text);font-size:.9rem;">
+        {{ doctor[2] }}
+      </span>
+      &nbsp; {{ doctor[1] }}
+    </p>
+  </div>
+  <a href="{{ url_for('patient.browse_doctors') }}" class="btn btn-secondary">&#8592; Back</a>
+</div>
+
+<!-- ── Step 1: Choose a date ─────────────────────────────────── -->
+<div class="card mb-2">
+  <div class="card-title">Step 1 — Choose a date</div>
+  <form method="GET" action="{{ url_for('patient.book_appointment', doctor_id=doctor[0]) }}"
+        class="d-flex gap-1 align-center flex-wrap">
+    <input
+      type="date"
+      name="date"
+      value="{{ chosen_date }}"
+      min="{{ today_min }}"
+      required
+      style="flex:0 0 200px;"
+    />
+    <button type="submit" class="btn btn-primary">Check Availability</button>
+  </form>
+</div>
+
+<!-- ── Step 2: Pick a slot & reason ──────────────────────────── -->
+{% if chosen_date %}
+  <div class="card">
+    <div class="card-title">
+      Step 2 — Available slots on
+      <strong>
+        {% set parts = chosen_date.split('-') %}
+        {{ parts[2] }}/{{ parts[1] }}/{{ parts[0] }}
+      </strong>
+    </div>
+
+    {% if available_slots %}
+      <form method="POST"
+            action="{{ url_for('patient.book_appointment', doctor_id=doctor[0]) }}"
+            id="book-form">
+
+        <div class="form-group">
+          <label>Select a time slot</label>
+          <div class="slot-grid">
+            {% for slot in available_slots %}
+              <input
+                type="radio"
+                class="slot-radio"
+                name="slot_id"
+                id="slot_{{ slot[0] }}"
+                value="{{ slot[0] }}"
+              />
+              <label class="slot-label" for="slot_{{ slot[0] }}">
+                {{ slot[1].strftime('%I:%M %p') }}<br/>
+                <span style="font-size:.75rem;opacity:.75;">
+                  to {{ slot[2].strftime('%I:%M %p') }}
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reason">Reason for visit</label>
+          <textarea
+            id="reason"
+            name="reason"
+            placeholder="Briefly describe your symptoms or the purpose of this appointment…"
+            required
+          ></textarea>
+        </div>
+
+        <div class="d-flex gap-1">
+          <button type="submit" class="btn btn-primary">Confirm Booking</button>
+          <a href="{{ url_for('patient.browse_doctors') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+
+      </form>
+    {% else %}
+      <div class="empty-state" style="padding:1.5rem;">
+        <span class="empty-icon">&#x1F4C5;</span>
+        <p>No available slots on this date. Try a different date.</p>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+<script>
+  // Set the min date to today on the date picker
+  document.querySelector('input[name="date"]').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

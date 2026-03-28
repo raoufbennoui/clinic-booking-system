@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>My Bookings</h1>
+    <p>Your full appointment history</p>
+  </div>
+  <a href="{{ url_for('patient.browse_doctors') }}" class="btn btn-primary">+ New Booking</a>
+</div>
+
+{% if bookings %}
+  {% for b in bookings %}
+  <div class="booking-card">
+    <div>
+      <div class="booking-card-title">{{ b[1] }}</div>
+      <div class="booking-card-meta">
+        <span class="badge" style="background:var(--info-bg);color:var(--info-text);margin-right:.4rem;">
+          {{ b[2] }}
+        </span>
+        {% if b[3] %}
+          {{ b[3].strftime('%A, %d %B %Y') }}
+          &nbsp;&middot;&nbsp;
+          {{ b[4].strftime('%I:%M %p') if b[4] else '' }}
+          &ndash;
+          {{ b[5].strftime('%I:%M %p') if b[5] else '' }}
+        {% endif %}
+      </div>
+      {% if b[7] %}
+        <div class="booking-card-reason">
+          <strong>Reason:</strong> {{ b[7] }}
+        </div>
+      {% endif %}
+      <div style="font-size:.78rem;color:var(--text-muted);margin-top:.4rem;">
+        Booked on {{ b[8].strftime('%d %b %Y') if b[8] else '' }}
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.6rem;">
+      <span class="badge badge-{{ b[6] }}">{{ b[6] }}</span>
+      {% if b[6] == 'pending' %}
+        <form method="POST"
+              action="{{ url_for('patient.cancel_booking', booking_id=b[0]) }}"
+              data-confirm="Cancel this booking? The time slot will be freed for others.">
+          <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="empty-state">
+    <span class="empty-icon">&#x1F4C5;</span>
+    <p>You haven't made any bookings yet.</p>
+    <a href="{{ url_for('patient.browse_doctors') }}" class="btn btn-primary">Find a Doctor</a>
+  </div>
+{% endif %}
+{% endblock %}

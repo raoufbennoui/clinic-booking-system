@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Welcome, {{ session.name }}</h1>
+    <p>Today is {{ today.strftime('%A, %d %B %Y') }}</p>
+  </div>
+  <div class="d-flex gap-1 flex-wrap">
+    <a href="{{ url_for('doctor.add_slot') }}"  class="btn btn-primary">+ Add Slot</a>
+    <a href="{{ url_for('doctor.bookings') }}"  class="btn btn-secondary">All Bookings</a>
+  </div>
+</div>
+
+<!-- ── Stats ─────────────────────────────────────────────────── -->
+<div class="stats-grid">
+  <div class="stat-card amber">
+    <div class="stat-value">{{ pending_count }}</div>
+    <div class="stat-label">Pending</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ confirmed_count }}</div>
+    <div class="stat-label">Confirmed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ today_bookings | length }}</div>
+    <div class="stat-label">Today's Appointments</div>
+  </div>
+</div>
+
+<!-- ── Today's schedule ──────────────────────────────────────── -->
+<div class="section">
+  <div class="section-header">
+    <h2>Today's Schedule</h2>
+  </div>
+
+  {% if today_bookings %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Patient</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in today_bookings %}
+          <tr>
+            <td style="white-space:nowrap;font-weight:600;">
+              {{ b[2].strftime('%I:%M %p') }} &ndash; {{ b[3].strftime('%I:%M %p') }}
+            </td>
+            <td><strong>{{ b[1] }}</strong></td>
+            <td style="color:var(--text-muted);max-width:220px;font-size:.85rem;">
+              {{ b[5][:60] ~ '…' if b[5] and b[5]|length > 60 else b[5] or '—' }}
+            </td>
+            <td><span class="badge badge-{{ b[4] }}">{{ b[4] }}</span></td>
+            <td>
+              <div class="table-actions">
+                {% if b[4] == 'pending' %}
+                  <form method="POST" action="{{ url_for('doctor.confirm_booking', booking_id=b[0]) }}">
+                    <button type="submit" class="btn btn-success btn-sm">Confirm</button>
+                  </form>
+                  <form method="POST" action="{{ url_for('doctor.reject_booking', booking_id=b[0]) }}"
+                        data-confirm="Reject this booking and free the slot?">
+                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                  </form>
+                {% elif b[4] == 'confirmed' %}
+                  <form method="POST" action="{{ url_for('doctor.complete_booking', booking_id=b[0]) }}">
+                    <button type="submit" class="btn btn-secondary btn-sm">Mark Complete</button>
+                  </form>
+                {% else %}
+                  <span style="font-size:.8rem;color:var(--text-muted);">—</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">&#x1F4C5;</span>
+      <p>No appointments scheduled for today.</p>
+      <a href="{{ url_for('doctor.add_slot') }}" class="btn btn-primary">Add Available Slots</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

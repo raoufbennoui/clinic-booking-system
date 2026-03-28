@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Add Doctor{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Add New Doctor</h1>
+    <p>Create a doctor account — they can log in immediately with these credentials</p>
+  </div>
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&#8592; Back</a>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <form method="POST" action="{{ url_for('admin.add_doctor') }}">
+
+    <div class="form-group">
+      <label for="name">Full name</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        placeholder="Dr. Jane Smith"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email address</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="doctor@clinic.com"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="specialty">Specialty</label>
+      <input
+        type="text"
+        id="specialty"
+        name="specialty"
+        placeholder="e.g. General Medicine, Cardiology"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Temporary password</label>
+      <input
+        type="text"
+        id="password"
+        name="password"
+        placeholder="Provide an initial password"
+        required
+      />
+      <span class="form-hint">The doctor can use this to log in. They should change it.</span>
+    </div>
+
+    <div class="mt-2 d-flex gap-1">
+      <button type="submit" class="btn btn-primary">Add Doctor</button>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

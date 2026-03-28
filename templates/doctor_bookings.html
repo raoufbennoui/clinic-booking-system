@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}My Bookings — Doctor{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>My Bookings</h1>
+    <p>All appointment requests for your slots</p>
+  </div>
+  <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">&#8592; Dashboard</a>
+</div>
+
+{% if bookings %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Status</th>
+          <th>Reason</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+        <tr>
+          <td><strong>{{ b[1] }}</strong></td>
+          <td style="white-space:nowrap;">{{ b[2].strftime('%d %b %Y') if b[2] else '—' }}</td>
+          <td style="white-space:nowrap;">
+            {{ b[3].strftime('%I:%M %p') if b[3] else '' }}
+            &ndash;
+            {{ b[4].strftime('%I:%M %p') if b[4] else '' }}
+          </td>
+          <td><span class="badge badge-{{ b[5] }}">{{ b[5] }}</span></td>
+          <td style="max-width:200px;color:var(--text-muted);font-size:.82rem;">
+            {{ b[6][:60] ~ '…' if b[6] and b[6]|length > 60 else b[6] or '—' }}
+          </td>
+          <td>
+            <div class="table-actions">
+              {% if b[5] == 'pending' %}
+                <form method="POST" action="{{ url_for('doctor.confirm_booking', booking_id=b[0]) }}">
+                  <button type="submit" class="btn btn-success btn-sm">Confirm</button>
+                </form>
+                <form method="POST" action="{{ url_for('doctor.reject_booking', booking_id=b[0]) }}"
+                      data-confirm="Reject this booking? The slot will be freed.">
+                  <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+              {% elif b[5] == 'confirmed' %}
+                <form method="POST" action="{{ url_for('doctor.complete_booking', booking_id=b[0]) }}">
+                  <button type="submit" class="btn btn-secondary btn-sm">Complete</button>
+                </form>
+              {% else %}
+                <span style="font-size:.8rem;color:var(--text-muted);">No actions</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-icon">&#x1F4CB;</span>
+    <p>No bookings yet. Add time slots so patients can book you.</p>
+    <a href="{{ url_for('doctor.add_slot') }}" class="btn btn-primary">Add Slot</a>
+  </div>
+{% endif %}
+{% endblock %}

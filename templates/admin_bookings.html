@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}All Bookings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>All Bookings</h1>
+    <p>System-wide appointment list with filters</p>
+  </div>
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&#8592; Dashboard</a>
+</div>
+
+<!-- ── Filter bar ─────────────────────────────────────────────── -->
+<form method="GET" action="{{ url_for('admin.bookings') }}" class="filter-bar mb-2">
+  <label for="date-filter">Date</label>
+  <input
+    type="date"
+    id="date-filter"
+    name="date"
+    value="{{ filter_date }}"
+    style="flex:0 0 160px;"
+  />
+
+  <label for="status-filter">Status</label>
+  <select id="status-filter" name="status" style="flex:0 0 180px;">
+    <option value="">All statuses</option>
+    <option value="pending"   {% if filter_status == 'pending'   %}selected{% endif %}>Pending</option>
+    <option value="confirmed" {% if filter_status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+    <option value="cancelled" {% if filter_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+    <option value="completed" {% if filter_status == 'completed' %}selected{% endif %}>Completed</option>
+  </select>
+
+  <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+  {% if filter_date or filter_status %}
+    <a href="{{ url_for('admin.bookings') }}" class="btn btn-secondary btn-sm">Clear</a>
+  {% endif %}
+</form>
+
+<!-- ── Results ────────────────────────────────────────────────── -->
+{% if bookings %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Patient</th>
+          <th>Doctor</th>
+          <th>Specialty</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Status</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+        <tr>
+          <td style="color:var(--text-muted);font-size:.8rem;">{{ b[0] }}</td>
+          <td><strong>{{ b[1] }}</strong></td>
+          <td>{{ b[2] }}</td>
+          <td>
+            <span class="badge" style="background:var(--info-bg);color:var(--info-text);">
+              {{ b[3] }}
+            </span>
+          </td>
+          <td style="white-space:nowrap;">{{ b[4].strftime('%d %b %Y') if b[4] else '—' }}</td>
+          <td style="white-space:nowrap;">
+            {{ b[5].strftime('%I:%M %p') if b[5] else '' }}
+            &ndash;
+            {{ b[6].strftime('%I:%M %p') if b[6] else '' }}
+          </td>
+          <td><span class="badge badge-{{ b[7] }}">{{ b[7] }}</span></td>
+          <td style="max-width:200px;color:var(--text-muted);font-size:.82rem;">
+            {{ b[8][:60] ~ '…' if b[8] and b[8]|length > 60 else b[8] or '—' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-muted mt-1" style="font-size:.8rem;">
+    Showing {{ bookings|length }} booking{{ 's' if bookings|length != 1 else '' }}
+  </p>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-icon">&#x1F4C5;</span>
+    <p>No bookings found for the selected filters.</p>
+    {% if filter_date or filter_status %}
+      <a href="{{ url_for('admin.bookings') }}" class="btn btn-secondary">Clear filters</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

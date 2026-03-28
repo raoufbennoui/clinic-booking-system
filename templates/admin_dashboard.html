@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Admin Dashboard</h1>
+    <p>System overview and doctor management</p>
+  </div>
+  <a href="{{ url_for('admin.add_doctor') }}" class="btn btn-primary">+ Add Doctor</a>
+</div>
+
+<!-- ── Stats ─────────────────────────────────────────────────── -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ total_today }}</div>
+    <div class="stat-label">Bookings Today</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-value">{{ total_pending }}</div>
+    <div class="stat-label">Pending</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ total_confirmed }}</div>
+    <div class="stat-label">Confirmed</div>
+  </div>
+  <div class="stat-card sky">
+    <div class="stat-value">{{ doctors | length }}</div>
+    <div class="stat-label">Doctors</div>
+  </div>
+</div>
+
+<!-- ── Doctor list ───────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-header">
+    <h2>Registered Doctors</h2>
+    <a href="{{ url_for('admin.bookings') }}" class="btn btn-secondary btn-sm">
+      View All Bookings
+    </a>
+  </div>
+
+  {% if doctors %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Specialty</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in doctors %}
+          <tr>
+            <td style="color:var(--text-muted);">{{ loop.index }}</td>
+            <td><strong>{{ doc[1] }}</strong></td>
+            <td style="color:var(--text-muted);">{{ doc[2] }}</td>
+            <td>
+              <span class="badge" style="background:var(--info-bg);color:var(--info-text);">
+                {{ doc[3] }}
+              </span>
+            </td>
+            <td style="color:var(--text-muted);font-size:.8rem;">
+              {{ doc[4].strftime('%d %b %Y') if doc[4] else '—' }}
+            </td>
+            <td>
+              <form method="POST"
+                    action="{{ url_for('admin.remove_doctor', doctor_id=doc[0]) }}"
+                    data-confirm="Remove Dr. {{ doc[1] }}? This will also delete all their slots and bookings.">
+                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">&#x1F469;&#x200D;&#x2695;&#xFE0F;</span>
+      <p>No doctors registered yet.</p>
+      <a href="{{ url_for('admin.add_doctor') }}" class="btn btn-primary">Add First Doctor</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

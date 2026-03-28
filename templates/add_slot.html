@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Add Time Slot{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Add Available Slot</h1>
+    <p>Add a time window when you are available for appointments</p>
+  </div>
+  <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">&#8592; Back</a>
+</div>
+
+<div class="card" style="max-width:480px;">
+  <form method="POST" action="{{ url_for('doctor.add_slot') }}">
+
+    <div class="form-group">
+      <label for="date">Date</label>
+      <input
+        type="date"
+        id="date"
+        name="date"
+        required
+        min="{{ today_min }}"
+      />
+      <span class="form-hint">Must be today or a future date.</span>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="start_time">Start time</label>
+        <input type="time" id="start_time" name="start_time" required />
+      </div>
+      <div class="form-group">
+        <label for="end_time">End time</label>
+        <input type="time" id="end_time" name="end_time" required />
+      </div>
+    </div>
+
+    <div class="mt-2 d-flex gap-1">
+      <button type="submit" class="btn btn-primary">Add Slot</button>
+      <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  // Set min date to today
+  document.getElementById('date').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

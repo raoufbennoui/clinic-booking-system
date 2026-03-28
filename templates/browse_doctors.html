@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Browse Doctors{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Find a Doctor</h1>
+    <p>Browse our specialists and book an appointment</p>
+  </div>
+</div>
+
+<!-- ── Specialty filter ──────────────────────────────────────── -->
+<form method="GET" action="{{ url_for('patient.browse_doctors') }}" class="filter-bar">
+  <label for="specialty">Filter by specialty</label>
+  <select id="specialty" name="specialty">
+    <option value="">All specialties</option>
+    {% for sp in specialties %}
+      <option value="{{ sp }}" {% if sp == selected_specialty %}selected{% endif %}>{{ sp }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+  {% if selected_specialty %}
+    <a href="{{ url_for('patient.browse_doctors') }}" class="btn btn-secondary btn-sm">Clear</a>
+  {% endif %}
+</form>
+
+<!-- ── Doctor grid ───────────────────────────────────────────── -->
+{% if doctors %}
+  <div class="doctor-grid">
+    {% for doc in doctors %}
+    <div class="doctor-card">
+      <div class="doctor-avatar">
+        {{ doc[1][0] | upper }}
+      </div>
+      <div class="doctor-info">
+        <div class="doctor-name">{{ doc[1] }}</div>
+        <div class="doctor-specialty">{{ doc[2] }}</div>
+      </div>
+      <a href="{{ url_for('patient.book_appointment', doctor_id=doc[0]) }}"
+         class="btn btn-primary btn-sm" style="align-self:flex-start;">
+        Book Appointment
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-icon">&#x1F50D;</span>
+    <p>No doctors found{% if selected_specialty %} for "{{ selected_specialty }}"{% endif %}.</p>
+    {% if selected_specialty %}
+      <a href="{{ url_for('patient.browse_doctors') }}" class="btn btn-secondary">Show all</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

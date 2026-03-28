@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Hello, {{ session.name }} &#x1F44B;</h1>
+    <p>Manage your clinic appointments</p>
+  </div>
+  <a href="{{ url_for('patient.browse_doctors') }}" class="btn btn-primary">
+    + Book Appointment
+  </a>
+</div>
+
+<!-- ── Stats ─────────────────────────────────────────────────── -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ total }}</div>
+    <div class="stat-label">Total Bookings</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-value">{{ pending }}</div>
+    <div class="stat-label">Awaiting Confirmation</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ upcoming | length }}</div>
+    <div class="stat-label">Upcoming Confirmed</div>
+  </div>
+</div>
+
+<!-- ── Quick actions ─────────────────────────────────────────── -->
+<div class="section">
+  <h2 class="mb-2">Quick Actions</h2>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('patient.browse_doctors') }}" class="card" style="flex:1;min-width:200px;text-align:center;cursor:pointer;text-decoration:none;">
+      <span style="font-size:2rem;display:block;margin-bottom:.5rem;">&#x1F50D;</span>
+      <strong>Find a Doctor</strong>
+      <p class="text-muted" style="font-size:.85rem;margin-top:.25rem;">Browse by specialty</p>
+    </a>
+    <a href="{{ url_for('patient.my_bookings') }}" class="card" style="flex:1;min-width:200px;text-align:center;cursor:pointer;text-decoration:none;">
+      <span style="font-size:2rem;display:block;margin-bottom:.5rem;">&#x1F4CB;</span>
+      <strong>My Bookings</strong>
+      <p class="text-muted" style="font-size:.85rem;margin-top:.25rem;">View all appointments</p>
+    </a>
+  </div>
+</div>
+
+<!-- ── Upcoming appointments ─────────────────────────────────── -->
+{% if upcoming %}
+<div class="section">
+  <div class="section-header">
+    <h2>Upcoming Appointments</h2>
+    <a href="{{ url_for('patient.my_bookings') }}" class="btn btn-secondary btn-sm">View all</a>
+  </div>
+
+  {% for appt in upcoming %}
+  <div class="booking-card">
+    <div>
+      <div class="booking-card-title">{{ appt[1] }}</div>
+      <div class="booking-card-meta">
+        <span class="badge" style="background:var(--info-bg);color:var(--info-text);margin-right:.4rem;">{{ appt[2] }}</span>
+        {{ appt[3].strftime('%A, %d %B %Y') if appt[3] else '' }}
+        &nbsp;at&nbsp;
+        {{ appt[4].strftime('%I:%M %p') if appt[4] else '' }}
+      </div>
+    </div>
+    <span class="badge badge-confirmed">confirmed</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
