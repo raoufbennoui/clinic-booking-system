@@ -20,7 +20,7 @@ MediBook provides:
 | ORM/Driver | psycopg2           | Direct SQL control; connection pooling built-in; parameterised queries prevent SQL injection |
 | Auth       | werkzeug.security  | Industry-standard password hashing (PBKDF2-SHA256); already ships with Flask |
 | Frontend   | Jinja2 + custom CSS| Server-side rendering keeps the codebase simple; no JavaScript framework needed for this use case |
-| Deployment | Flask dev server   | Deployment | Gunicorn + Railway | Production WSGI server; cloud deployment with managed PostgreSQL|
+| Deployment | Flask dev server   | Deployment  Gunicorn + Railway  Production WSGI server cloud deployment with managed PostgreSQL|
 
 ---
 
