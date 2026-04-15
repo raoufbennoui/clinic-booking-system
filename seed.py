@@ -86,13 +86,13 @@ def seed() -> None:
     conn.close()
 
     print("\nSeeding complete!")
-    print("─" * 40)
+    print("-" * 40)
     print("Default credentials:")
     print("  Admin   : admin@clinic.com   / admin123")
     print("  Doctor 1: sarah@clinic.com   / doctor123  (General Medicine)")
     print("  Doctor 2: michael@clinic.com / doctor123  (Dermatology)")
     print("  Doctor 3: emily@clinic.com   / doctor123  (Cardiology)")
-    print("─" * 40)
+    print("-" * 40)
 
 
 if __name__ == "__main__":
