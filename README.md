@@ -1,5 +1,7 @@
 # MediBook — Clinic Appointment Booking System
 
+#LIVE DEMO LINK : clinic-booking-system-production-29d2.up.railway.app
+
 ## Project Description
 
 MediBook is a full-stack web application that solves a common problem in small and medium clinics: **scheduling chaos**. Without a booking system, clinics rely on phone calls, paper registers, and manual confirmation — leading to double bookings, missed appointments, and wasted doctor time.
