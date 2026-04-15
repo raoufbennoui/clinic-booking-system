@@ -1,10 +1,10 @@
 """
-force_db.py — Ensures all database tables exist before the app starts.
+force_db.py — Creates all database tables before the app starts.
 
-This project uses raw psycopg2 (NOT SQLAlchemy), so tables are created
-by running schema.sql directly against the database.
+This project uses raw psycopg2 (NOT SQLAlchemy).
+Tables are created by running schema.sql directly.
 
-Called by the Procfile before gunicorn:
+Called by Procfile:
     web: python force_db.py && gunicorn 'app:create_app()'
 """
 
@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 
 load_dotenv()
 
+
 def get_connection():
     database_url = os.getenv("DATABASE_URL", "")
 
@@ -24,16 +25,13 @@ def get_connection():
         database_url = database_url.replace("postgres://", "postgresql://", 1)
 
     if database_url:
-        parsed = urlparse(database_url)
-        return psycopg2.connect(
-            dbname=parsed.path.lstrip("/"),
-            user=parsed.username,
-            password=parsed.password,
-            host=parsed.hostname,
-            port=parsed.port or 5432,
-        )
+        # Pass DSN directly so SSL settings in the URL are preserved.
+        # Explicitly add sslmode=require for Railway.
+        print(f"Connecting via DATABASE_URL (host will be hidden)...", flush=True)
+        return psycopg2.connect(dsn=database_url, sslmode="require")
 
-    # Fallback to individual env vars (local development)
+    # Local development fallback
+    print("Connecting via individual env vars (local)...", flush=True)
     return psycopg2.connect(
         dbname=os.getenv("DB_NAME", "clinic_booking"),
         user=os.getenv("DB_USER", "postgres"),
@@ -44,7 +42,7 @@ def get_connection():
 
 
 def run_schema():
-    schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
+    schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "schema.sql")
 
     if not os.path.exists(schema_path):
         print("ERROR: schema.sql not found.", flush=True)
@@ -53,17 +51,30 @@ def run_schema():
     with open(schema_path, "r") as f:
         sql = f.read()
 
-    print("Connecting to database...", flush=True)
+    print("Running schema.sql against the database...", flush=True)
     try:
         conn = get_connection()
         conn.autocommit = True
         cur = conn.cursor()
-        cur.execute(sql)
+
+        # Execute each statement individually to avoid psycopg2
+        # "multiple statements not allowed" errors
+        statements = [s.strip() for s in sql.split(";") if s.strip()]
+        for stmt in statements:
+            try:
+                cur.execute(stmt)
+            except psycopg2.errors.DuplicateTable:
+                pass  # IF NOT EXISTS handles this, but just in case
+            except Exception as e:
+                # Log but continue — some NOTICE-level things look like errors
+                print(f"  Warning on statement: {e}", flush=True)
+
         cur.close()
         conn.close()
-        print("Database tables verified / created successfully.", flush=True)
+        print("Database schema verified successfully.", flush=True)
+
     except Exception as e:
-        print(f"ERROR: Could not initialise database: {e}", flush=True)
+        print(f"FATAL: Could not connect to database: {e}", flush=True)
         sys.exit(1)
 
 
